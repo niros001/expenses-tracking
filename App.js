@@ -1,36 +1,54 @@
-import * as React from 'react';
-import {MMKVLoader, useMMKVStorage} from 'react-native-mmkv-storage';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, View, ActivityIndicator} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import WelcomeScreen from './src/components/WelcomeScreen';
-import HomeScreen from './src/components/HomeScreen';
-import ProfileScreen from './src/components/ProfileScreen';
+import {
+  WelcomeScreen,
+  HomeScreen,
+  ProfileScreen,
+} from './src/components/screens';
+import storage from './src/storage';
 
-const storage = new MMKVLoader().initialize();
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const TabsNavigator = () => (
+const TabsNavigator = ({route: {params}}) => (
   <Tab.Navigator>
     <Tab.Screen
       name="Home"
       component={HomeScreen}
-      options={{tabBarIcon: () => null}}
+      options={{tabBarIcon: () => null, headerTitle: params.user}}
     />
     <Tab.Screen
       name="Profile"
       component={ProfileScreen}
-      options={{tabBarIcon: () => null}}
+      options={{tabBarIcon: () => null, headerTitle: params.user}}
     />
   </Tab.Navigator>
 );
 
 const App = () => {
-  const [user, setUser] = useMMKVStorage('user', storage, null);
-  const [expenses, setExpenses] = useMMKVStorage('expenses', storage, []);
+  const [user, setUser] = useState();
+  const [loading, setLoading] = useState(true);
 
-  return (
+  useEffect(() => {
+    storage
+      .load({key: 'user'})
+      .then(value => {
+        setUser(value);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  return loading ? (
+    <View style={styles.container}>
+      <ActivityIndicator />
+    </View>
+  ) : (
     <NavigationContainer>
       <Stack.Navigator>
         {!user && (
@@ -47,10 +65,19 @@ const App = () => {
             headerShown: false,
             gestureEnabled: false,
           }}
+          initialParams={{user}}
         />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default App;
