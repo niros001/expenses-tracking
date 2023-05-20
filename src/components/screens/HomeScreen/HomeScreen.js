@@ -60,10 +60,12 @@ const HomeScreen = ({expenses, loadExpenses}) => {
         initSections[value.date].push(value);
       });
 
-    return Object.keys(initSections).map(key => ({
-      title: key,
-      data: initSections[key],
-    }));
+    return Object.keys(initSections)
+      .map(key => ({
+        title: key,
+        data: initSections[key],
+      }))
+      .sort((a, b) => b.title.localeCompare(a.title));
   }, [expenses, filters]);
 
   return (
