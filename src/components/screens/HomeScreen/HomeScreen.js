@@ -1,12 +1,35 @@
-import React, {useCallback, useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import {connect} from 'react-redux';
+import {actions as expensesActions} from '../../../store/reducers/expenses';
 import Table from './Table';
 import FiltersModal from './FiltersModal';
 import {ExpensesManagement} from '../../shared';
+import storage from '../../../storage';
 
-const HomeScreen = () => {
+const HomeScreen = ({expenses, loadExpenses}) => {
+  const defaultFilters = useMemo(() => ({title: '', amount: 0, date: ''}), []);
   const [visible, setVisible] = useState(false);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState(defaultFilters);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    storage
+      .getAllDataForKey('expenses')
+      .then(value => {
+        loadExpenses(value);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [loadExpenses]);
 
   const onOpen = useCallback(() => {
     setVisible(true);
@@ -16,25 +39,67 @@ const HomeScreen = () => {
     setVisible(false);
   }, [setVisible]);
 
+  const totalAmount = useMemo(
+    () => expenses.reduce((acc, {amount}) => acc + amount, 0),
+    [expenses],
+  );
+
+  const sections = useMemo(() => {
+    const initSections = {};
+    expenses
+      .filter(
+        expense =>
+          expense.title.includes(filters.title) &&
+          (!filters.amount || expense.amount <= filters.amount) &&
+          (!filters.date || expense.date <= filters.date),
+      )
+      .forEach(value => {
+        if (!initSections[value.date]) {
+          initSections[value.date] = [];
+        }
+        initSections[value.date].push(value);
+      });
+
+    return Object.keys(initSections).map(key => ({
+      title: key,
+      data: initSections[key],
+    }));
+  }, [expenses, filters]);
+
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.row}>
-          <Text style={styles.title}>Total expenses:</Text>
-          <Text style={styles.amount}>999999$</Text>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator />
         </View>
-        <TouchableOpacity style={styles.filters} onPress={onOpen}>
-          <Text>Filters</Text>
-        </TouchableOpacity>
-        <Table filters={filters} />
-        <FiltersModal
-          visible={visible}
-          onClose={onClose}
-          filters={filters}
-          setFilters={setFilters}
-        />
-      </View>
-      <ExpensesManagement />
+      ) : (
+        <>
+          <View style={styles.content}>
+            <View style={styles.row}>
+              <Text style={styles.title}>Total expenses:</Text>
+              <Text style={styles.amount}>{totalAmount.toLocaleString()}$</Text>
+            </View>
+            <TouchableOpacity style={styles.filters} onPress={onOpen}>
+              <Text
+                style={
+                  (filters.title || filters.amount || filters.date) &&
+                  styles.bold
+                }>
+                Filters
+              </Text>
+            </TouchableOpacity>
+            <Table sections={sections} />
+            <FiltersModal
+              visible={visible}
+              onClose={onClose}
+              filters={filters}
+              setFilters={setFilters}
+              defaultFilters={defaultFilters}
+            />
+          </View>
+          <ExpensesManagement />
+        </>
+      )}
     </View>
   );
 };
@@ -43,17 +108,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+    paddingVertical: 12,
   },
   content: {
     flex: 1,
-    paddingTop: 12,
   },
   row: {
     flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
   },
   title: {
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  bold: {
     fontWeight: 'bold',
   },
   amount: {
@@ -69,8 +138,16 @@ const styles = StyleSheet.create({
     height: 28,
     width: 94,
     marginRight: 12,
-    marginBottom: 12,
+    marginVertical: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
-export default HomeScreen;
+export default connect(
+  ({expenses}) => ({expenses}),
+  expensesActions,
+)(HomeScreen);

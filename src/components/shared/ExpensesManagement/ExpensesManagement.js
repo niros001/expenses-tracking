@@ -13,16 +13,10 @@ const ExpensesManagement = () => {
     setVisible(false);
   }, [setVisible]);
 
-  const onUpdateExpense = useCallback(() => {}, []);
-
   return (
     <>
       <RoundButton onPress={onOpen} />
-      <ExpensesModal
-        visible={visible}
-        onClose={onClose}
-        onUpdateExpense={onUpdateExpense}
-      />
+      <ExpensesModal visible={visible} onClose={onClose} />
     </>
   );
 };

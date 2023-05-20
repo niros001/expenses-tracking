@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -7,23 +7,46 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import {connect} from 'react-redux';
+import {actions as expensesActions} from '../../../store/reducers/expenses';
 import Field from './Field';
 import PrimaryButton from '../PrimaryButton';
+import storage from '../../../../src/storage';
+
 const windowHeight = Dimensions.get('window').height;
 
-const ExpensesModal = ({editable, visible, onClose, onUpdateExpense}) => {
+const ExpensesModal = ({expense, visible, onClose, updateExpense}) => {
   const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(0);
   const [date, setDate] = useState('');
+
+  useEffect(() => {
+    if (visible) {
+      setTitle(expense?.title || '');
+      setAmount(expense?.amount || 0);
+      setDate(expense?.date || '');
+    }
+  }, [visible, expense]);
 
   const isDisabled = useMemo(
     () => !title || !amount || !date,
     [title, amount, date],
   );
 
-  const handleUpdateExpense = useCallback(() => {
-    onUpdateExpense({title, amount, date});
-  }, [onUpdateExpense, title, amount, date]);
+  const onUpdateExpense = useCallback(() => {
+    let newExpense = {
+      id: expense?.id || Date.now().toString(36),
+      title,
+      amount,
+      date,
+    };
+    storage
+      .save({key: 'expenses', id: newExpense.id, data: newExpense})
+      .then(() => {
+        updateExpense(newExpense);
+        onClose();
+      });
+  }, [updateExpense, expense, title, amount, date, onClose]);
 
   return (
     <Modal
@@ -35,15 +58,25 @@ const ExpensesModal = ({editable, visible, onClose, onUpdateExpense}) => {
         <TouchableOpacity style={styles.closeButtonWrapper} onPress={onClose}>
           <Text style={styles.closeButton}>X</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>{editable ? 'Edit' : 'Create'} Expense</Text>
-        <Field title="Title" value={title} onChangeText={setTitle} />
-        <Field title="Amount" value={amount} onChangeText={setAmount} />
-        <Field title="Date" value={date} onChangeText={setDate} />
+        <Text style={styles.title}>{expense ? 'Edit' : 'Create'} Expense</Text>
+        <Field
+          type="string"
+          title="Title"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <Field
+          type="number"
+          title="Amount"
+          value={amount === 0 ? '' : amount.toString()}
+          onChangeText={setAmount}
+        />
+        <Field type="date" title="Date" value={date} onChangeText={setDate} />
         <View style={styles.primaryButtonWrapper}>
           <PrimaryButton
             disabled={isDisabled}
-            onPress={handleUpdateExpense}
-            text={editable ? 'Save' : 'Create'}
+            onPress={onUpdateExpense}
+            text={expense ? 'Save' : 'Create'}
           />
         </View>
       </View>
@@ -82,4 +115,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ExpensesModal;
+export default connect(null, expensesActions)(ExpensesModal);

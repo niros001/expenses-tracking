@@ -6,10 +6,11 @@ import {
   TouchableOpacity,
   NativeModules,
 } from 'react-native';
+import {connect} from 'react-redux';
 import {ExpensesManagement} from '../shared';
 import storage from '../../storage';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({expenses}) => {
   const onSignOut = useCallback(() => {
     const p1 = storage.remove({key: 'user'});
     const p2 = storage.clearMapForKey('expenses');
@@ -23,7 +24,7 @@ const ProfileScreen = () => {
       <View style={styles.content}>
         <View style={styles.item}>
           <Text>Total Expenses Items</Text>
-          <Text style={styles.bold}>3</Text>
+          <Text style={styles.bold}>{expenses.length}</Text>
         </View>
         <View style={styles.item}>
           <TouchableOpacity onPress={onSignOut}>
@@ -61,4 +62,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen;
+export default connect(({expenses}) => ({expenses}))(ProfileScreen);

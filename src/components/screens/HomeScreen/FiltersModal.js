@@ -13,7 +13,13 @@ import {PrimaryButton} from '../../shared';
 
 const windowHeight = Dimensions.get('window').height;
 
-const FiltersModal = ({visible, onClose, filters, setFilters}) => {
+const FiltersModal = ({
+  visible,
+  onClose,
+  filters,
+  setFilters,
+  defaultFilters,
+}) => {
   const [tempFilters, setTempFilters] = useState({...filters});
 
   const handleFilters = useCallback(
@@ -28,6 +34,10 @@ const FiltersModal = ({visible, onClose, filters, setFilters}) => {
     onClose();
   }, [filters, onClose]);
 
+  const onClean = useCallback(() => {
+    setTempFilters(defaultFilters);
+  }, [defaultFilters]);
+
   const onFilter = useCallback(() => {
     setFilters(tempFilters);
     onClose();
@@ -41,24 +51,27 @@ const FiltersModal = ({visible, onClose, filters, setFilters}) => {
       transparent={true}>
       <View style={styles.modalContainer}>
         <View style={styles.header}>
-          <Button title="clean" />
+          <Button title="clean" onPress={onClean} />
           <Text style={styles.title}>Filters</Text>
           <TouchableOpacity onPress={handleClose}>
             <Text style={styles.closeButton}>X</Text>
           </TouchableOpacity>
         </View>
         <Field
+          type="string"
           title="Title"
           value={tempFilters.title}
           onChangeText={value => handleFilters('title', value)}
         />
         <Field
-          title="Amount"
-          value={tempFilters.amount}
+          type="number"
+          title="Amount (up to)"
+          value={tempFilters.amount === 0 ? '' : tempFilters.amount.toString()}
           onChangeText={value => handleFilters('amount', value)}
         />
         <Field
-          title="Date"
+          type="date"
+          title="Date (up tp)"
           value={tempFilters.date}
           onChangeText={value => handleFilters('date', value)}
         />

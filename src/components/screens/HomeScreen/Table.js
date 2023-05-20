@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   SectionList,
   StyleSheet,
@@ -6,47 +6,43 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
+import ExpensesModal from '../../shared/ExpensesManagement/ExpensesModal';
 
-const DATA = [
-  {
-    title: 'Main dishes',
-    data: ['Pizza', 'Burger', 'Risotto'],
-  },
-  {
-    title: 'Sides',
-    data: ['French Fries', 'Onion Rings', 'Fried Shrimps'],
-  },
-  {
-    title: 'Drinks',
-    data: ['Water', 'Coke', 'Beer'],
-  },
-  {
-    title: 'Desserts',
-    data: ['Cheese Cake', 'Ice Cream'],
-  },
-];
+const Table = ({sections}) => {
+  const [itemSelected, setItemSelected] = useState();
 
-const Table = () => {
+  const onClose = useCallback(() => {
+    setItemSelected(null);
+  }, []);
+
   return (
-    <SectionList
-      sections={DATA}
-      keyExtractor={(item, index) => item + index}
-      renderItem={({item, index}) => (
-        <TouchableOpacity
-          style={[
-            styles.itemWrapper,
-            index > 0 ? styles.bordered : styles.noneBordered,
-          ]}>
-          <Text style={styles.itemText}>{item}</Text>
-          <Text style={styles.itemText}>333$</Text>
-        </TouchableOpacity>
-      )}
-      renderSectionHeader={({section: {title}}) => (
-        <View style={styles.headerWrapper}>
-          <Text style={styles.headerText}>{title}</Text>
-        </View>
-      )}
-    />
+    <>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item, index) => item + index}
+        renderItem={({item, index}) => (
+          <TouchableOpacity
+            onPress={() => setItemSelected(item)}
+            style={[
+              styles.itemWrapper,
+              index > 0 ? styles.bordered : styles.noneBordered,
+            ]}>
+            <Text style={styles.itemText}>{item.title}</Text>
+            <Text style={styles.itemText}>{item.amount.toLocaleString()}$</Text>
+          </TouchableOpacity>
+        )}
+        renderSectionHeader={({section: {title}}) => (
+          <View style={styles.headerWrapper}>
+            <Text style={styles.headerText}>{title}</Text>
+          </View>
+        )}
+      />
+      <ExpensesModal
+        expense={itemSelected}
+        visible={!!itemSelected}
+        onClose={onClose}
+      />
+    </>
   );
 };
 
