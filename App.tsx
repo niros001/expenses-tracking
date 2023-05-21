@@ -29,8 +29,8 @@ const TabsNavigator = ({route: {params}}) => (
 );
 
 const App = () => {
-  const [user, setUser] = useState();
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<string | undefined>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     storage
@@ -55,7 +55,7 @@ const App = () => {
           <Stack.Screen
             name="Welcome"
             component={WelcomeScreen}
-            options={{title: null}}
+            options={{title: ''}}
           />
         )}
         <Stack.Screen

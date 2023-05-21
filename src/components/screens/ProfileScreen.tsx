@@ -9,8 +9,13 @@ import {
 import {connect} from 'react-redux';
 import {ExpensesManagement} from '../shared';
 import storage from '../../storage';
+import {ExpenseType} from '../../types';
 
-const ProfileScreen = ({expenses}) => {
+interface Props {
+  expenses: ExpenseType[];
+}
+
+const ProfileScreen = ({expenses}: Props) => {
   const onSignOut = useCallback(() => {
     const p1 = storage.remove({key: 'user'});
     const p2 = storage.clearMapForKey('expenses');

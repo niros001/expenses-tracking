@@ -3,7 +3,7 @@ import RoundButton from './RoundButton';
 import ExpensesModal from './ExpensesModal';
 
 const ExpensesManagement = () => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState<boolean>(false);
 
   const onOpen = useCallback(() => {
     setVisible(true);

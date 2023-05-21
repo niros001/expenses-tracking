@@ -4,7 +4,7 @@ import {PrimaryButton} from '../shared';
 import storage from '../../storage';
 
 const WelcomeScreen = ({navigation}) => {
-  const [textInput, setTextInput] = useState('');
+  const [textInput, setTextInput] = useState<string>('');
 
   const onLogin = useCallback(() => {
     storage.save({key: 'user', data: textInput}).then(() => {

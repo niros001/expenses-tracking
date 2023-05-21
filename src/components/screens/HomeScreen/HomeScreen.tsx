@@ -6,18 +6,23 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {connect} from 'react-redux';
 import {actions as expensesActions} from '../../../store/reducers/expenses';
 import Table from './Table';
 import FiltersModal from './FiltersModal';
 import {ExpensesManagement} from '../../shared';
 import storage from '../../../storage';
+import {FiltersType} from '../../../types';
 
 const HomeScreen = ({expenses, loadExpenses}) => {
-  const defaultFilters = useMemo(() => ({title: '', amount: 0, date: ''}), []);
-  const [visible, setVisible] = useState(false);
-  const [filters, setFilters] = useState(defaultFilters);
-  const [loading, setLoading] = useState(true);
+  const defaultFilters: FiltersType = useMemo(
+    () => ({title: '', amount: 0, date: ''}),
+    [],
+  );
+  const [visible, setVisible] = useState<boolean>(false);
+  const [filters, setFilters] = useState<FiltersType>(defaultFilters);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     storage
@@ -82,11 +87,13 @@ const HomeScreen = ({expenses, loadExpenses}) => {
               <Text style={styles.amount}>{totalAmount.toLocaleString()}$</Text>
             </View>
             <TouchableOpacity style={styles.filters} onPress={onOpen}>
+              <Icon name="filter" size={16} color="black" />
               <Text
-                style={
-                  (filters.title || filters.amount || filters.date) &&
-                  styles.bold
-                }>
+                style={[
+                  styles.filterText,
+                  !!(filters.title || filters.amount || filters.date) &&
+                    styles.bold,
+                ]}>
                 Filters
               </Text>
             </TouchableOpacity>
@@ -133,6 +140,7 @@ const styles = StyleSheet.create({
   },
   filters: {
     alignSelf: 'flex-end',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#D9D9D9',
@@ -146,6 +154,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  filterText: {
+    marginLeft: 5,
   },
 });
 

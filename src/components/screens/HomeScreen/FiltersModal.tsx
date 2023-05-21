@@ -8,8 +8,10 @@ import {
   Button,
   Dimensions,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import Field from '../../shared/ExpensesManagement/Field';
 import {PrimaryButton} from '../../shared';
+import {FiltersType} from '../../../types';
 
 const windowHeight = Dimensions.get('window').height;
 
@@ -20,7 +22,7 @@ const FiltersModal = ({
   setFilters,
   defaultFilters,
 }) => {
-  const [tempFilters, setTempFilters] = useState({...filters});
+  const [tempFilters, setTempFilters] = useState<FiltersType>({...filters});
 
   const handleFilters = useCallback(
     (key, value) => {
@@ -54,7 +56,7 @@ const FiltersModal = ({
           <Button title="clean" onPress={onClean} />
           <Text style={styles.title}>Filters</Text>
           <TouchableOpacity onPress={handleClose}>
-            <Text style={styles.closeButton}>X</Text>
+            <Icon name="close" size={30} color="black" />
           </TouchableOpacity>
         </View>
         <Field
@@ -98,10 +100,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-  },
-  closeButton: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   title: {
     fontSize: 18,

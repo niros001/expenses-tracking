@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {connect} from 'react-redux';
 import {actions as expensesActions} from '../../../store/reducers/expenses';
 import Field from './Field';
@@ -16,9 +17,9 @@ import storage from '../../../../src/storage';
 const windowHeight = Dimensions.get('window').height;
 
 const ExpensesModal = ({expense, visible, onClose, updateExpense}) => {
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState(0);
-  const [date, setDate] = useState('');
+  const [title, setTitle] = useState<string>('');
+  const [amount, setAmount] = useState<number>(0);
+  const [date, setDate] = useState<string>('');
 
   useEffect(() => {
     if (visible) {
@@ -56,7 +57,7 @@ const ExpensesModal = ({expense, visible, onClose, updateExpense}) => {
       transparent={true}>
       <View style={styles.modalContainer}>
         <TouchableOpacity style={styles.closeButtonWrapper} onPress={onClose}>
-          <Text style={styles.closeButton}>X</Text>
+          <Icon name="close" size={30} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>{expense ? 'Edit' : 'Create'} Expense</Text>
         <Field
@@ -95,10 +96,6 @@ const styles = StyleSheet.create({
   },
   closeButtonWrapper: {
     alignSelf: 'flex-end',
-  },
-  closeButton: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   title: {
     fontSize: 18,

@@ -13,7 +13,7 @@ import DatePicker from 'react-native-modern-datepicker';
 const windowHeight = Dimensions.get('window').height;
 
 const Field = ({type, title, value, onChangeText}) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState<boolean>(false);
 
   const handleChangeText = useCallback(
     text => {
